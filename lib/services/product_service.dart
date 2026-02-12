@@ -8,9 +8,9 @@ class ProductService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   CollectionReference<Map<String, dynamic>> _itemsRef(
-    String category,
-    String subCategory,
-  ) {
+      String category,
+      String subCategory,
+      ) {
     return _firestore
         .collection('products')
         .doc(category)
@@ -20,13 +20,13 @@ class ProductService {
   }
 
   Future<String> uploadImage(
-    File image,
-    String category,
-    String subCategory,
-    String productId,
-    String folder,
-    String filename,
-  ) async {
+      File image,
+      String category,
+      String subCategory,
+      String productId,
+      String folder,
+      String filename,
+      ) async {
     final path =
         'products/$category/$subCategory/$productId/$folder/$filename';
     final ref = _storage.ref().child(path);
@@ -35,12 +35,12 @@ class ProductService {
   }
 
   Future<List<String>> uploadImages(
-    List<File> images,
-    String category,
-    String subCategory,
-    String productId, {
-    String folder = 'default',
-  }) async {
+      List<File> images,
+      String category,
+      String subCategory,
+      String productId, {
+        String folder = 'default',
+      }) async {
     final List<String> imageUrls = [];
     for (int i = 0; i < images.length; i++) {
       final url = await uploadImage(

@@ -14,11 +14,11 @@ class AuthService {
   // Accept either a dart:io File (mobile/desktop) or an XFile/Uint8List for web.
   // Files will be stored under SellerDocuments/<userId>/<filename>
   Future<String> uploadImage(
-    dynamic image,
-    String userId,
-    String type,
-    String sellerName,
-  ) async {
+      dynamic image,
+      String userId,
+      String type,
+      String sellerName,
+      ) async {
     String sanitize(String s) {
       return s
           .toLowerCase()

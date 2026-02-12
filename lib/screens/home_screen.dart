@@ -26,7 +26,6 @@ class HomeScreen extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // management cards to show on the home screen
     final managementItems = [
       _ManagementItem(
         Icons.person,
@@ -117,7 +116,6 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 8),
             LayoutBuilder(
               builder: (context, constraints) {
-                // determine columns based on width
                 final crossAxisCount = constraints.maxWidth > 800
                     ? 4
                     : constraints.maxWidth > 600
@@ -136,12 +134,18 @@ class HomeScreen extends StatelessWidget {
                       title: item.title,
                       subtitle: item.subtitle,
                       onTap: () {
-                        if (item.routeName != null) {
-                          Navigator.of(context).pushNamed(item.routeName!);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${item.title} tapped')),
+                        if (item.routeName == null) return;
+
+
+                        if (item.routeName ==
+                            NotificationsScreen.routeName) {
+                          Navigator.of(context).pushNamed(
+                            NotificationsScreen.routeName,
+                            arguments: seller.id,
                           );
+                        } else {
+                          Navigator.of(context)
+                              .pushNamed(item.routeName!);
                         }
                       },
                     );
@@ -149,8 +153,6 @@ class HomeScreen extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: 16),
-            // Products section removed as requested
           ],
         ),
       ),
@@ -198,9 +200,9 @@ class _ManagementCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(icon, size: 32, color: Theme.of(context).primaryColor),
+              Icon(icon, size: 32,
+                  color: Theme.of(context).primaryColor),
               const SizedBox(height: 8),
               Text(
                 title,
@@ -211,7 +213,8 @@ class _ManagementCard extends StatelessWidget {
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
+                style: const TextStyle(
+                    fontSize: 12, color: Colors.black54),
               ),
             ],
           ),

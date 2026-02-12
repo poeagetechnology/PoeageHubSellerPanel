@@ -62,11 +62,11 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
               child: ListTile(
                 leading: p.images.isNotEmpty
                     ? Image.network(
-                        p.images.first,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                      )
+                  p.images.first,
+                  width: 56,
+                  height: 56,
+                  fit: BoxFit.cover,
+                )
                     : const Icon(Icons.image_not_supported),
                 title: Text(p.name),
                 subtitle: Text('₹${p.price.toStringAsFixed(2)} • Stock: ${p.stock}'),

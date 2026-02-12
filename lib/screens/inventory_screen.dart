@@ -83,11 +83,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   children: [
                     p.images.isNotEmpty
                         ? Image.network(
-                            p.images.first,
-                            width: 56,
-                            height: 56,
-                            fit: BoxFit.cover,
-                          )
+                      p.images.first,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                    )
                         : const Icon(Icons.image_not_supported),
                     const SizedBox(width: 12),
                     Expanded(

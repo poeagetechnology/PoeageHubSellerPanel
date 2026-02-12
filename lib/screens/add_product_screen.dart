@@ -447,7 +447,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       final subCategory = _subCategoryController.text.trim();
       final newId =
           widget.product?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString();
+              DateTime.now().millisecondsSinceEpoch.toString();
 
       List<String> imageUrls = [];
       if (_imageFiles.isNotEmpty) {
@@ -714,7 +714,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 items: _categories
                     .map(
                       (c) => DropdownMenuItem<String>(value: c, child: Text(c)),
-                    )
+                )
                     .toList(),
                 onChanged: (val) {
                   setState(() {
@@ -742,7 +742,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 items: (_subCategories[_categoryController.text] ?? [])
                     .map(
                       (s) => DropdownMenuItem<String>(value: s, child: Text(s)),
-                    )
+                )
                     .toList(),
                 onChanged: (val) {
                   setState(() {
@@ -828,7 +828,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ],
                 ),
                 ..._units.map(
-                  (u) => Card(
+                      (u) => Card(
                     child: ListTile(
                       title: Text('${u.label} (${u.id})'),
                       subtitle: Column(
@@ -836,7 +836,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         children: [
                           Text(
                             'Prod: ₹${u.productionCost.toStringAsFixed(2)}  Sell: ₹${u.sellingPrice.toStringAsFixed(2)}'
-                            '${u.specialPrice != null ? '  Special: ₹${u.specialPrice!.toStringAsFixed(2)}' : ''}',
+                                '${u.specialPrice != null ? '  Special: ₹${u.specialPrice!.toStringAsFixed(2)}' : ''}',
                           ),
                           const SizedBox(height: 6),
                           Wrap(
@@ -913,7 +913,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ],
                 ),
                 ..._variants.map(
-                  (v) => Card(
+                      (v) => Card(
                     child: ListTile(
                       title: Text('${v.name} (${v.id})'),
                       subtitle: Column(
@@ -921,8 +921,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         children: [
                           Text(
                             '${v.productionCost != null ? 'Prod: ₹${v.productionCost!.toStringAsFixed(2)}  ' : ''}'
-                            '${v.sellingPrice != null ? 'Sell: ₹${v.sellingPrice!.toStringAsFixed(2)}  ' : ''}'
-                            '${v.specialPrice != null ? 'Special: ₹${v.specialPrice!.toStringAsFixed(2)}' : ''}',
+                                '${v.sellingPrice != null ? 'Sell: ₹${v.sellingPrice!.toStringAsFixed(2)}  ' : ''}'
+                                '${v.specialPrice != null ? 'Special: ₹${v.specialPrice!.toStringAsFixed(2)}' : ''}',
                           ),
                           const SizedBox(height: 6),
                           Wrap(
@@ -975,7 +975,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ),
                 const SizedBox(height: 8),
                 ..._units.map(
-                  (u) => Card(
+                      (u) => Card(
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Column(
@@ -995,7 +995,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               final summary = ce == null
                                   ? 'Not set'
                                   : '₹${(ce.sellingPrice ?? 0).toStringAsFixed(0)}'
-                                        '${ce.images.isNotEmpty ? ' • ${ce.images.length} img' : ''}';
+                                  '${ce.images.isNotEmpty ? ' • ${ce.images.length} img' : ''}';
                               return OutlinedButton(
                                 onPressed: () => _editComboDialog(u.id, v.id),
                                 child: Row(
@@ -1097,10 +1097,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 child: _isLoading
                     ? const CircularProgressIndicator()
                     : Text(
-                        widget.product == null
-                            ? 'Add Product'
-                            : 'Update Product',
-                      ),
+                  widget.product == null
+                      ? 'Add Product'
+                      : 'Update Product',
+                ),
               ),
             ],
           ),

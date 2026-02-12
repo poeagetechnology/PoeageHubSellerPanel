@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
+
+// Providers
 import 'providers/auth_provider.dart';
 
 // Screens
@@ -26,11 +28,16 @@ import 'screens/offer_scroller_screen.dart';
 
 import 'models/product.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint("Firebase init error: $e");
+  }
 
   runApp(
     const ProviderScope(
@@ -44,8 +51,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+
+      ],
       child: MaterialApp(
         title: 'Seller Panel',
         debugShowCheckedModeBanner: false,
@@ -54,25 +64,34 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         initialRoute: '/login',
-        routes: {
-          '/login': (context) => const LoginScreen(),
-          '/signup': (context) => const SignupScreen(),
-          '/waiting': (context) => const WaitingApprovalScreen(),
-          '/rejected': (context) => const RejectedScreen(),
-          '/home': (context) => const HomeScreen(),
-          '/add-product': (context) => const AddProductScreen(),
-          '/edit-product': (context) => AddProductScreen(
-            product:
-            ModalRoute.of(context)!.settings.arguments as Product,
-          ),
 
-          // Management screens
+        routes: {
+          '/login': (_) => const LoginScreen(),
+          '/signup': (_) => const SignupScreen(),
+          '/waiting': (_) => const WaitingApprovalScreen(),
+          '/rejected': (_) => const RejectedScreen(),
+          '/home': (_) => const HomeScreen(),
+          '/add-product': (_) => const AddProductScreen(),
+
+
+          '/edit-product': (context) {
+            final args = ModalRoute.of(context)?.settings.arguments;
+
+            if (args is Product) {
+              return AddProductScreen(product: args);
+            }
+
+            return const Scaffold(
+              body: Center(
+                child: Text('Invalid product data'),
+              ),
+            );
+          },
+
           VendorProfileScreen.routeName: (_) =>
           const VendorProfileScreen(),
           ProductManagementScreen.routeName: (_) =>
           const ProductManagementScreen(),
-          NotificationsScreen.routeName: (_) =>
-          const NotificationsScreen(),
           OrderManagementScreen.routeName: (_) =>
           const OrderManagementScreen(),
           PaymentsPayoutsScreen.routeName: (_) =>
@@ -85,6 +104,27 @@ class MyApp extends StatelessWidget {
           const OfferBannerScreen(),
           OfferScrollerScreen.routeName: (_) =>
           const OfferScrollerScreen(),
+        },
+
+
+        onGenerateRoute: (settings) {
+          if (settings.name == NotificationsScreen.routeName) {
+            final sellerId = settings.arguments;
+
+            if (sellerId is String) {
+              return MaterialPageRoute(
+                builder: (_) => NotificationsScreen(sellerId: sellerId),
+              );
+            }
+          }
+
+          return MaterialPageRoute(
+            builder: (_) => const Scaffold(
+              body: Center(
+                child: Text('Route not found'),
+              ),
+            ),
+          );
         },
       ),
     );

@@ -138,23 +138,23 @@ class UnitOption {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'label': label,
-        'productionCost': productionCost,
-        'sellingPrice': sellingPrice,
-        'specialPrice': specialPrice,
-        'images': images,
-      };
+    'id': id,
+    'label': label,
+    'productionCost': productionCost,
+    'sellingPrice': sellingPrice,
+    'specialPrice': specialPrice,
+    'images': images,
+  };
 
   factory UnitOption.fromMap(Map<String, dynamic> map) => UnitOption(
-        id: map['id'] ?? '',
-        label: map['label'] ?? '',
-        productionCost: (map['productionCost'] ?? 0).toDouble(),
-        sellingPrice: (map['sellingPrice'] ?? 0).toDouble(),
-        specialPrice:
-            map['specialPrice'] != null ? (map['specialPrice'] as num).toDouble() : null,
-        images: List<String>.from(map['images'] ?? []),
-      );
+    id: map['id'] ?? '',
+    label: map['label'] ?? '',
+    productionCost: (map['productionCost'] ?? 0).toDouble(),
+    sellingPrice: (map['sellingPrice'] ?? 0).toDouble(),
+    specialPrice:
+    map['specialPrice'] != null ? (map['specialPrice'] as num).toDouble() : null,
+    images: List<String>.from(map['images'] ?? []),
+  );
 }
 
 class VariantOption {
@@ -175,25 +175,25 @@ class VariantOption {
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'name': name,
-        'productionCost': productionCost,
-        'sellingPrice': sellingPrice,
-        'specialPrice': specialPrice,
-        'images': images,
-      };
+    'id': id,
+    'name': name,
+    'productionCost': productionCost,
+    'sellingPrice': sellingPrice,
+    'specialPrice': specialPrice,
+    'images': images,
+  };
 
   factory VariantOption.fromMap(Map<String, dynamic> map) => VariantOption(
-        id: map['id'] ?? '',
-        name: map['name'] ?? '',
-        productionCost:
-            map['productionCost'] != null ? (map['productionCost'] as num).toDouble() : null,
-        sellingPrice:
-            map['sellingPrice'] != null ? (map['sellingPrice'] as num).toDouble() : null,
-        specialPrice:
-            map['specialPrice'] != null ? (map['specialPrice'] as num).toDouble() : null,
-        images: List<String>.from(map['images'] ?? []),
-      );
+    id: map['id'] ?? '',
+    name: map['name'] ?? '',
+    productionCost:
+    map['productionCost'] != null ? (map['productionCost'] as num).toDouble() : null,
+    sellingPrice:
+    map['sellingPrice'] != null ? (map['sellingPrice'] as num).toDouble() : null,
+    specialPrice:
+    map['specialPrice'] != null ? (map['specialPrice'] as num).toDouble() : null,
+    images: List<String>.from(map['images'] ?? []),
+  );
 }
 
 class ComboOption {
@@ -214,21 +214,21 @@ class ComboOption {
   });
 
   Map<String, dynamic> toMap() => {
-        'unitId': unitId,
-        'variantId': variantId,
-        'productionCost': productionCost,
-        'sellingPrice': sellingPrice,
-        'specialPrice': specialPrice,
-        'images': images,
-      };
+    'unitId': unitId,
+    'variantId': variantId,
+    'productionCost': productionCost,
+    'sellingPrice': sellingPrice,
+    'specialPrice': specialPrice,
+    'images': images,
+  };
 
   factory ComboOption.fromMap(Map<String, dynamic> map) => ComboOption(
-        unitId: map['unitId'] ?? '',
-        variantId: map['variantId'] ?? '',
-        productionCost: (map['productionCost'] ?? 0).toDouble(),
-        sellingPrice: (map['sellingPrice'] ?? 0).toDouble(),
-        specialPrice:
-            map['specialPrice'] != null ? (map['specialPrice'] as num).toDouble() : null,
-        images: List<String>.from(map['images'] ?? []),
-      );
+    unitId: map['unitId'] ?? '',
+    variantId: map['variantId'] ?? '',
+    productionCost: (map['productionCost'] ?? 0).toDouble(),
+    sellingPrice: (map['sellingPrice'] ?? 0).toDouble(),
+    specialPrice:
+    map['specialPrice'] != null ? (map['specialPrice'] as num).toDouble() : null,
+    images: List<String>.from(map['images'] ?? []),
+  );
 }
