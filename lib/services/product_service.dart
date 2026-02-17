@@ -8,11 +8,14 @@ class ProductService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   CollectionReference<Map<String, dynamic>> _itemsRef(
+      String sellerId,
       String category,
       String subCategory,
       ) {
     return _firestore
         .collection('products')
+        .doc(sellerId)
+        .collection('categories')
         .doc(category)
         .collection('subcategories')
         .doc(subCategory)
@@ -21,6 +24,7 @@ class ProductService {
 
   Future<String> uploadImage(
       File image,
+      String sellerId,
       String category,
       String subCategory,
       String productId,
@@ -28,7 +32,7 @@ class ProductService {
       String filename,
       ) async {
     final path =
-        'products/$category/$subCategory/$productId/$folder/$filename';
+        'products/$sellerId/$category/$subCategory/$productId/$folder/$filename';
     final ref = _storage.ref().child(path);
     await ref.putFile(image);
     return await ref.getDownloadURL();
@@ -36,6 +40,7 @@ class ProductService {
 
   Future<List<String>> uploadImages(
       List<File> images,
+      String sellerId,
       String category,
       String subCategory,
       String productId, {
@@ -45,6 +50,7 @@ class ProductService {
     for (int i = 0; i < images.length; i++) {
       final url = await uploadImage(
         images[i],
+        sellerId,
         category,
         subCategory,
         productId,
@@ -57,15 +63,19 @@ class ProductService {
   }
 
   Future<void> addProduct(Product product) async {
-    await _itemsRef(product.category, product.subCategory)
-        .doc(product.id)
-        .set(product.toMap());
+    await _itemsRef(
+      product.sellerId,
+      product.category,
+      product.subCategory,
+    ).doc(product.id).set(product.toMap());
   }
 
   Future<void> updateProduct(Product product) async {
-    await _itemsRef(product.category, product.subCategory)
-        .doc(product.id)
-        .update(product.toMap());
+    await _itemsRef(
+      product.sellerId,
+      product.category,
+      product.subCategory,
+    ).doc(product.id).update(product.toMap());
   }
 
   Future<void> deleteProduct(String productId) async {

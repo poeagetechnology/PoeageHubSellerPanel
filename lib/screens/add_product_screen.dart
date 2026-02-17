@@ -442,6 +442,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     try {
       final seller = context.read<AuthProvider>().currentSeller;
       if (seller == null) throw Exception('No seller found');
+      final sellerId = seller.id;
 
       final category = _categoryController.text.trim();
       final subCategory = _subCategoryController.text.trim();
@@ -453,6 +454,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (_imageFiles.isNotEmpty) {
         imageUrls = await _productService.uploadImages(
           _imageFiles,
+          sellerId,
           category,
           subCategory,
           newId,
@@ -469,6 +471,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           if (files.isNotEmpty) {
             urls = await _productService.uploadImages(
               files,
+              sellerId,
               category,
               subCategory,
               newId,
@@ -498,6 +501,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           if (files.isNotEmpty) {
             urls = await _productService.uploadImages(
               files,
+              sellerId,
               category,
               subCategory,
               newId,
@@ -534,6 +538,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           if (ce.images.isNotEmpty) {
             urls = await _productService.uploadImages(
               ce.images,
+              sellerId,
               category,
               subCategory,
               newId,
