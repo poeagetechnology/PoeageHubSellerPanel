@@ -35,7 +35,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _nameController = TextEditingController();
   final _brandController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _priceController = TextEditingController();
+  final _productionCostController = TextEditingController();
+  final _sellingPriceController = TextEditingController();
+  final _specialPriceController = TextEditingController();
+  final _vipPriceController = TextEditingController();
   final _stockController = TextEditingController();
   final _categoryController = TextEditingController();
   final _subCategoryController = TextEditingController();
@@ -201,22 +204,42 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   void initState() {
     super.initState();
+
     if (widget.product != null) {
-      _nameController.text = widget.product!.name;
-      _brandController.text = widget.product!.brandName;
-      _descriptionController.text = widget.product!.description;
-      _priceController.text = widget.product!.price.toString();
-      _stockController.text = widget.product!.stock.toString();
-      _categoryController.text = widget.product!.category;
-      _subCategoryController.text = widget.product!.subCategory;
-      _minStockController.text = widget.product!.minStock.toString();
-      _expiryDate = widget.product!.expiryDate;
-      _unitMode = widget.product!.unitMode;
-      _variantMode = widget.product!.variantMode;
+      final product = widget.product!;
+
+      _nameController.text = product.name;
+      _brandController.text = product.brandName;
+      _descriptionController.text = product.description;
+
+      // 🔥 Updated Pricing Fields
+      _productionCostController.text =
+          product.productionCost.toString();
+
+      _sellingPriceController.text =
+          product.sellingPrice.toString();
+
+      _specialPriceController.text =
+          product.specialPrice?.toString() ?? '';
+
+      _vipPriceController.text =
+          product.vipPrice?.toString() ?? '';
+
+      _stockController.text = product.stock.toString();
+      _minStockController.text = product.minStock.toString();
+
+      _categoryController.text = product.category;
+      _subCategoryController.text = product.subCategory;
+
+      _expiryDate = product.expiryDate;
+      _unitMode = product.unitMode;
+      _variantMode = product.variantMode;
+
       _units.clear();
-      _units.addAll(widget.product!.units);
+      _units.addAll(product.units);
+
       _variants.clear();
-      _variants.addAll(widget.product!.variants);
+      _variants.addAll(product.variants);
     }
   }
 
@@ -225,11 +248,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
     _nameController.dispose();
     _brandController.dispose();
     _descriptionController.dispose();
-    _priceController.dispose();
+
+    _productionCostController.dispose();
+    _sellingPriceController.dispose();
+    _specialPriceController.dispose();
+    _vipPriceController.dispose();
+
     _stockController.dispose();
     _categoryController.dispose();
     _subCategoryController.dispose();
     _minStockController.dispose();
+
     super.dispose();
   }
 
@@ -428,6 +457,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final productionCost =
+    double.parse(_productionCostController.text);
+
+    final sellingPrice =
+    double.parse(_sellingPriceController.text);
+
+    if (sellingPrice < productionCost) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              "Selling price must be greater than production cost"),
+        ),
+      );
+      return;
+    }
     if (_imageFiles.isEmpty && widget.product?.images.isEmpty != false) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select at least one image')),
@@ -565,27 +609,46 @@ class _AddProductScreenState extends State<AddProductScreen> {
         sellerName: seller.sellerName,
         businessName: seller.businessName,
         phone: seller.phone,
+
         name: _nameController.text,
         brandName: _brandController.text,
         description: _descriptionController.text,
-        price: double.parse(_priceController.text),
+
+        // 🔥 NEW PRICING STRUCTURE
+        productionCost: double.parse(_productionCostController.text),
+        sellingPrice: double.parse(_sellingPriceController.text),
+        specialPrice: _specialPriceController.text.isNotEmpty
+            ? double.parse(_specialPriceController.text)
+            : null,
+        vipPrice: _vipPriceController.text.isNotEmpty
+            ? double.parse(_vipPriceController.text)
+            : null,
+
         stock: int.parse(_stockController.text),
+
         images: widget.product == null
             ? imageUrls
             : [...widget.product!.images, ...imageUrls],
+
         category: category,
         subCategory: subCategory,
+
         minStock: int.tryParse(_minStockController.text) ?? 0,
         expiryDate: _expiryDate,
+
         unitMode: _unitMode,
         variantMode: _variantMode,
+
         units: _unitMode == 'multi'
             ? List<UnitOption>.from(newUnits)
             : const [],
+
         variants: _variantMode == 'multi'
             ? List<VariantOption>.from(newVariants)
             : const [],
+
         combos: combos,
+
         createdAt: widget.product?.createdAt ?? DateTime.now(),
       );
 
@@ -670,24 +733,75 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 12),
+
+              /// Production Cost
               TextFormField(
-                controller: _priceController,
+                controller: _productionCostController,
                 decoration: const InputDecoration(
-                  labelText: 'Price',
+                  labelText: 'Production Cost',
                   border: OutlineInputBorder(),
                   prefixText: '₹',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter price';
+                    return 'Please enter production cost';
                   }
                   if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
+                    return 'Enter valid number';
                   }
                   return null;
                 },
+              ),
+
+              const SizedBox(height: 16),
+
+              /// Selling Price
+              TextFormField(
+                controller: _sellingPriceController,
+                decoration: const InputDecoration(
+                  labelText: 'Selling Price',
+                  border: OutlineInputBorder(),
+                  prefixText: '₹',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter selling price';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'Enter valid number';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              /// Special Price
+              TextFormField(
+                controller: _specialPriceController,
+                decoration: const InputDecoration(
+                  labelText: 'Special / Discounted Price (Optional)',
+                  border: OutlineInputBorder(),
+                  prefixText: '₹',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+
+              const SizedBox(height: 16),
+
+              /// VIP Price
+              TextFormField(
+                controller: _vipPriceController,
+                decoration: const InputDecoration(
+                  labelText: 'VIP Price (Optional)',
+                  border: OutlineInputBorder(),
+                  prefixText: '₹',
+                ),
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               TextFormField(

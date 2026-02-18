@@ -18,6 +18,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
   Future<void> _updateStock(Product p, int newStock) async {
     try {
       if (newStock < 0) return;
+
       final updated = Product(
         id: p.id,
         sellerId: p.sellerId,
@@ -27,19 +28,29 @@ class _InventoryScreenState extends State<InventoryScreen> {
         name: p.name,
         brandName: p.brandName,
         description: p.description,
-        price: p.price,
+
+        // 🔥 NEW PRICING STRUCTURE
+        productionCost: p.productionCost,
+        sellingPrice: p.sellingPrice,
+        specialPrice: p.specialPrice,
+        vipPrice: p.vipPrice,
+
         stock: newStock,
         images: p.images,
         category: p.category,
         subCategory: p.subCategory,
         minStock: p.minStock,
         expiryDate: p.expiryDate,
-        specialPrice: p.specialPrice,
-        productionCost: p.productionCost,
+
         unitMode: p.unitMode,
         variantMode: p.variantMode,
+        units: p.units,
+        variants: p.variants,
+        combos: p.combos,
+
         createdAt: p.createdAt,
       );
+
       await _service.updateProduct(updated);
     } catch (e) {
       if (mounted) {

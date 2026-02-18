@@ -69,7 +69,9 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                 )
                     : const Icon(Icons.image_not_supported),
                 title: Text(p.name),
-                subtitle: Text('₹${p.price.toStringAsFixed(2)} • Stock: ${p.stock}'),
+                subtitle: Text(
+                  '₹${(p.specialPrice ?? p.sellingPrice).toStringAsFixed(2)} • Stock: ${p.stock}',
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
