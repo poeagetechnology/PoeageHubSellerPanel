@@ -8,7 +8,7 @@ class Product {
   final String brandName;
   final String description;
 
-  // 🔥 NEW PRICING STRUCTURE
+
   final double productionCost;
   final double sellingPrice;
   final double? specialPrice;

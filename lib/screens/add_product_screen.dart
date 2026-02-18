@@ -212,7 +212,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _brandController.text = product.brandName;
       _descriptionController.text = product.description;
 
-      // 🔥 Updated Pricing Fields
+
       _productionCostController.text =
           product.productionCost.toString();
 
@@ -614,7 +614,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         brandName: _brandController.text,
         description: _descriptionController.text,
 
-        // 🔥 NEW PRICING STRUCTURE
+
         productionCost: double.parse(_productionCostController.text),
         sellingPrice: double.parse(_sellingPriceController.text),
         specialPrice: _specialPriceController.text.isNotEmpty
