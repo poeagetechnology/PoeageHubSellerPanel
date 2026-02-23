@@ -54,7 +54,6 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-
       ],
       child: MaterialApp(
         title: 'Seller Panel',
@@ -64,7 +63,6 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         initialRoute: '/login',
-
         routes: {
           '/login': (_) => const LoginScreen(),
           '/signup': (_) => const SignupScreen(),
@@ -72,7 +70,6 @@ class MyApp extends StatelessWidget {
           '/rejected': (_) => const RejectedScreen(),
           '/home': (_) => const HomeScreen(),
           '/add-product': (_) => const AddProductScreen(),
-
 
           '/edit-product': (context) {
             final args = ModalRoute.of(context)?.settings.arguments;
@@ -98,33 +95,18 @@ class MyApp extends StatelessWidget {
           const PaymentsPayoutsScreen(),
           ReportsAnalyticsScreen.routeName: (_) =>
           const ReportsAnalyticsScreen(),
-          SupportScreen.routeName: (_) => const SupportScreen(),
-          SettingsScreen.routeName: (_) => const SettingsScreen(),
+          SupportScreen.routeName: (_) =>
+          const SupportScreen(),
+          SettingsScreen.routeName: (_) =>
+          const SettingsScreen(),
           OfferBannerScreen.routeName: (_) =>
           const OfferBannerScreen(),
           OfferScrollerScreen.routeName: (_) =>
           const OfferScrollerScreen(),
-        },
 
-
-        onGenerateRoute: (settings) {
-          if (settings.name == NotificationsScreen.routeName) {
-            final sellerId = settings.arguments;
-
-            if (sellerId is String) {
-              return MaterialPageRoute(
-                builder: (_) => NotificationsScreen(sellerId: sellerId),
-              );
-            }
-          }
-
-          return MaterialPageRoute(
-            builder: (_) => const Scaffold(
-              body: Center(
-                child: Text('Route not found'),
-              ),
-            ),
-          );
+          /// ✅ FIXED HERE
+          NotificationsScreen.routeName: (_) =>
+          const NotificationsScreen(),
         },
       ),
     );
