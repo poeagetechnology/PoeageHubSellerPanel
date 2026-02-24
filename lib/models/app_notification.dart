@@ -9,6 +9,7 @@ class AppNotification {
   final String referenceId;
   final bool isRead;
   final DateTime createdAt;
+  final String? orderId;
 
   AppNotification({
     required this.notificationId,
@@ -19,6 +20,7 @@ class AppNotification {
     required this.referenceId,
     required this.isRead,
     required this.createdAt,
+    this.orderId,
   });
 
   factory AppNotification.fromFirestore(DocumentSnapshot doc) {
@@ -32,6 +34,7 @@ class AppNotification {
       type: data['type'] ?? 'system',
       referenceId: data['referenceId'] ?? '',
       isRead: data['isRead'] ?? false,
+      orderId: data['orderId'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
     );
   }

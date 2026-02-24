@@ -21,17 +21,27 @@ class OrderManagementScreen extends ConsumerStatefulWidget {
 
 class _OrderManagementScreenState
     extends ConsumerState<OrderManagementScreen> {
+
   String statusFilter = 'all';
   String searchQuery = '';
   DateTimeRange? dateRange;
   int rowsPerPage = 10;
 
+  String? _initialOrderId;
+  bool _hasOpenedInitialOrder = false;
+
   @override
   Widget build(BuildContext context) {
+
     final sellerId =
         p.Provider.of<AuthProvider>(context, listen: false)
             .currentSeller!
             .id;
+
+    final routeArgs = ModalRoute.of(context)?.settings.arguments;
+    if (routeArgs is String && _initialOrderId == null) {
+      _initialOrderId = routeArgs;
+    }
 
     final ordersAsync = ref.watch(ordersStreamProvider(sellerId));
 
@@ -40,6 +50,7 @@ class _OrderManagementScreenState
       body: Column(
         children: [
 
+          /// Filters UI
           Padding(
             padding: const EdgeInsets.all(8),
             child: Row(
@@ -66,7 +77,6 @@ class _OrderManagementScreenState
                     onChanged: (v) => setState(() => searchQuery = v),
                   ),
                 ),
-                const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.date_range),
                   onPressed: () async {
@@ -84,14 +94,37 @@ class _OrderManagementScreenState
             ),
           ),
 
-
           Expanded(
             child: ordersAsync.when(
               loading: () =>
               const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text(e.toString())),
               data: (orders) {
+
+                /// 🔥 AUTO OPEN FROM NOTIFICATION
+                if (_initialOrderId != null && !_hasOpenedInitialOrder) {
+                  final matched = orders
+                      .where((o) => o.docId == _initialOrderId)
+                      .toList();
+
+                  if (matched.isNotEmpty) {
+                    _hasOpenedInitialOrder = true;
+
+                    WidgetsBinding.instance
+                        .addPostFrameCallback((_) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              OrderDetailsScreen(order: matched.first),
+                        ),
+                      );
+                    });
+                  }
+                }
+
                 final filtered = orders.where((o) {
+
                   final statusOk =
                       statusFilter == 'all' || o.status == statusFilter;
 

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../providers/notification_provider.dart';
 import '../models/app_notification.dart';
+import 'order_management_screen.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   static const String routeName = '/notifications';
@@ -121,12 +122,19 @@ class _NotificationsScreenState
 
                 child: GestureDetector(
 
-                  /// ✅ FIXED markAsRead call
                   onTap: () async {
                     if (!notification.isRead) {
                       await service.markAsRead(
                         sellerId,
                         notification.notificationId,
+                      );
+                    }
+
+                    if (notification.type == 'order' &&
+                        notification.orderId != null) {
+                      Navigator.of(context).pushNamed(
+                        OrderManagementScreen.routeName,
+                        arguments: notification.orderId,
                       );
                     }
                   },

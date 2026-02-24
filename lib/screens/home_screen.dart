@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/notification_provider.dart';
 import 'add_product_screen.dart';
 import 'vendor_profile_screen.dart';
 import 'product_management_screen.dart';
@@ -13,18 +15,21 @@ import 'settings_screen.dart';
 import 'offer_banner_screen.dart';
 import 'offer_scroller_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   static const routeName = '/home';
 
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final seller = context.watch<AuthProvider>().currentSeller;
 
     if (seller == null) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    final unreadCountAsync =
+    ref.watch(unreadNotificationCountProvider(seller.id));
 
     final managementItems = [
       _ManagementItem(
@@ -93,6 +98,51 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(seller.businessName),
         actions: [
+          // 🔔 Notification Icon with Badge
+          unreadCountAsync.when(
+            data: (count) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(
+                        NotificationsScreen.routeName,
+                        arguments: seller.id,
+                      );
+                    },
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          count > 9 ? '9+' : '$count',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+            loading: () => const SizedBox(),
+            error: (_, __) => const SizedBox(),
+          ),
+
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -111,7 +161,8 @@ class HomeScreen extends StatelessWidget {
           children: [
             const Text(
               'Management',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style:
+              TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             LayoutBuilder(
@@ -127,7 +178,8 @@ class HomeScreen extends StatelessWidget {
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics:
+                  const NeverScrollableScrollPhysics(),
                   children: managementItems.map((item) {
                     return _ManagementCard(
                       icon: item.icon,
@@ -135,7 +187,6 @@ class HomeScreen extends StatelessWidget {
                       subtitle: item.subtitle,
                       onTap: () {
                         if (item.routeName == null) return;
-
 
                         if (item.routeName ==
                             NotificationsScreen.routeName) {
@@ -158,7 +209,8 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).pushNamed(AddProductScreen.routeName);
+          Navigator.of(context)
+              .pushNamed(AddProductScreen.routeName);
         },
         child: const Icon(Icons.add),
       ),
@@ -172,7 +224,8 @@ class _ManagementItem {
   final String subtitle;
   final String? routeName;
 
-  _ManagementItem(this.icon, this.title, this.subtitle, [this.routeName]);
+  _ManagementItem(this.icon, this.title, this.subtitle,
+      [this.routeName]);
 }
 
 class _ManagementCard extends StatelessWidget {
@@ -192,29 +245,35 @@ class _ManagementCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8)),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment:
+            MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 32,
-                  color: Theme.of(context).primaryColor),
+              Icon(icon,
+                  size: 32,
+                  color:
+                  Theme.of(context).primaryColor),
               const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    fontSize: 12, color: Colors.black54),
+                    fontSize: 12,
+                    color: Colors.black54),
               ),
             ],
           ),
