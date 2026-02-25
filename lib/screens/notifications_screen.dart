@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../providers/notification_provider.dart';
-import '../models/app_notification.dart';
 import 'order_management_screen.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
@@ -22,10 +21,29 @@ class _NotificationsScreenState
 
   String selectedFilter = 'all';
 
+  String getDateGroup(DateTime date) {
+    final now = DateTime.now();
+
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
+      return "Today";
+    }
+
+    final yesterday = now.subtract(const Duration(days: 1));
+
+    if (date.year == yesterday.year &&
+        date.month == yesterday.month &&
+        date.day == yesterday.day) {
+      return "Yesterday";
+    }
+
+    return "Older";
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    /// ✅ Always use FirebaseAuth UID (Production Safe)
     final sellerId = FirebaseAuth.instance.currentUser!.uid;
 
     final notificationsAsync =
@@ -93,140 +111,172 @@ class _NotificationsScreenState
             );
           }
 
-          return ListView.builder(
+          String? lastGroup;
+
+          return ListView(
             padding: const EdgeInsets.all(12),
-            itemCount: filteredNotifications.length,
-            itemBuilder: (context, index) {
+            children: filteredNotifications.map((notification) {
 
-              final AppNotification notification =
-              filteredNotifications[index];
+              final group =
+              getDateGroup(notification.createdAt);
 
-              return Dismissible(
-                key: Key(notification.notificationId),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  padding: const EdgeInsets.only(right: 20),
-                  alignment: Alignment.centerRight,
-                  color: Colors.red,
-                  child: const Icon(Icons.delete,
-                      color: Colors.white),
-                ),
+              List<Widget> widgets = [];
 
-                /// ✅ FIXED delete call
-                onDismissed: (_) async {
-                  await service.deleteNotification(
-                    sellerId,
-                    notification.notificationId,
-                  );
-                },
-
-                child: GestureDetector(
-
-                  onTap: () async {
-                    if (!notification.isRead) {
-                      await service.markAsRead(
-                        sellerId,
-                        notification.notificationId,
-                      );
-                    }
-
-                    if (notification.type == 'order' &&
-                        notification.orderId != null) {
-                      Navigator.of(context).pushNamed(
-                        OrderManagementScreen.routeName,
-                        arguments: notification.orderId,
-                      );
-                    }
-                  },
-
-                  child: Card(
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(12),
+              /// ✅ Insert Date Header
+              if (group != lastGroup) {
+                widgets.add(
+                  Padding(
+                    padding:
+                    const EdgeInsets.symmetric(vertical: 10),
+                    child: Text(
+                      group,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    child: Padding(
-                      padding:
-                      const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
+                  ),
+                );
+                lastGroup = group;
+              }
 
-                          Stack(
-                            children: [
-                              const Icon(
-                                Icons.notifications,
-                                size: 30,
-                                color: Colors.blue,
-                              ),
-                              if (!notification.isRead)
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration:
-                                    const BoxDecoration(
-                                      color: Colors.red,
-                                      shape:
-                                      BoxShape.circle,
+              /// ✅ Notification Card
+              widgets.add(
+                Dismissible(
+                  key: Key(notification.notificationId),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    padding:
+                    const EdgeInsets.only(right: 20),
+                    alignment: Alignment.centerRight,
+                    color: Colors.red,
+                    child: const Icon(Icons.delete,
+                        color: Colors.white),
+                  ),
+                  onDismissed: (_) async {
+                    await service.deleteNotification(
+                      sellerId,
+                      notification.notificationId,
+                    );
+                  },
+                  child: GestureDetector(
+                    onTap: () async {
+
+                      /// ✅ Mark as Read
+                      if (!notification.isRead) {
+                        await service.markAsRead(
+                          sellerId,
+                          notification.notificationId,
+                        );
+                      }
+
+                      /// ✅ Navigate to Order
+                      if (notification.type == 'order' &&
+                          notification.orderId != null) {
+                        Navigator.of(context).pushNamed(
+                          OrderManagementScreen.routeName,
+                          arguments:
+                          notification.orderId,
+                        );
+                      }
+                    },
+                    child: Card(
+                      elevation: 3,
+                      shape:
+                      RoundedRectangleBorder(
+                        borderRadius:
+                        BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding:
+                        const EdgeInsets.all(16),
+                        child: Row(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+
+                            /// 🔴 Notification Icon + Unread Dot
+                            Stack(
+                              children: [
+                                const Icon(
+                                  Icons.notifications,
+                                  size: 30,
+                                  color: Colors.blue,
+                                ),
+                                if (!notification.isRead)
+                                  Positioned(
+                                    right: 0,
+                                    top: 0,
+                                    child: Container(
+                                      width: 10,
+                                      height: 10,
+                                      decoration:
+                                      const BoxDecoration(
+                                        color: Colors.red,
+                                        shape:
+                                        BoxShape.circle,
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                              children: [
-
-                                Text(
-                                  notification.title,
-                                  style: TextStyle(
-                                    fontWeight:
-                                    notification.isRead
-                                        ? FontWeight.normal
-                                        : FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                Text(
-                                  notification.message,
-                                  style: const TextStyle(
-                                      fontSize: 14),
-                                ),
-
-                                const SizedBox(height: 8),
-
-                                Text(
-                                  DateFormat(
-                                      'dd MMM yyyy • hh:mm a')
-                                      .format(notification
-                                      .createdAt),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
                               ],
                             ),
-                          ),
-                        ],
+
+                            const SizedBox(width: 12),
+
+                            /// 📄 Text Section
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+
+                                  Text(
+                                    notification.title,
+                                    style: TextStyle(
+                                      fontWeight:
+                                      notification.isRead
+                                          ? FontWeight.normal
+                                          : FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 6),
+
+                                  Text(
+                                    notification.message,
+                                    style:
+                                    const TextStyle(
+                                        fontSize: 14),
+                                  ),
+
+                                  const SizedBox(height: 8),
+
+                                  Text(
+                                    DateFormat(
+                                        'dd MMM yyyy • hh:mm a')
+                                        .format(notification
+                                        .createdAt),
+                                    style:
+                                    const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               );
-            },
+
+              return Column(children: widgets);
+
+            }).toList(),
           );
         },
       ),

@@ -30,9 +30,16 @@ export const createNotificationOnNewOrder = onDocumentCreated(
 
       const orderId = event.params.orderId;
 
-      // 🔥 1️⃣ Create Firestore Notification
-      await admin.firestore().collection("notifications").add({
-        sellerId: sellerId,
+      const notificationRef = admin
+        .firestore()
+        .collection("notifications")
+        .doc(sellerId)
+        .collection("notifications")
+        .doc();
+
+      // Create Firestore Notification (Correct Structure)
+      await notificationRef.set({
+        notificationId: notificationRef.id,
         title: "New Order Received 🛒",
         message: "You have received a new order.",
         type: "order",
@@ -41,9 +48,9 @@ export const createNotificationOnNewOrder = onDocumentCreated(
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      console.log(`Notification document created for seller: ${sellerId}`);
+      console.log(`Notification created for seller: ${sellerId}`);
 
-      // 🔥 2️⃣ Get Seller FCM Token
+      //  Get Seller FCM Token
       const sellerDoc = await admin
         .firestore()
         .collection("sellers")
@@ -59,7 +66,7 @@ export const createNotificationOnNewOrder = onDocumentCreated(
 
       const fcmToken = sellerData.fcmToken;
 
-      // 🔥 3️⃣ Send Push Notification
+      // Send Push Notification
       await admin.messaging().send({
         token: fcmToken,
         notification: {

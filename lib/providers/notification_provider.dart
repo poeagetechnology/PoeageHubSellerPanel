@@ -21,7 +21,8 @@ final unreadNotificationCountProvider =
 StreamProvider.family<int, String>((ref, sellerId) {
   return FirebaseFirestore.instance
       .collection('notifications')
-      .where('sellerId', isEqualTo: sellerId)
+      .doc(sellerId)
+      .collection('notifications')
       .where('isRead', isEqualTo: false)
       .snapshots()
       .map((snapshot) => snapshot.docs.length);
