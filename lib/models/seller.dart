@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Seller {
   final String id;
   final String sellerName;
@@ -12,10 +14,12 @@ class Seller {
   final String aadharBackImage;
   final String gstCertificateImage;
 
-  // Existing approval
-  final String approvalStatus;
+  // ✅ Approval
+  final String approvalStatus; // pending / approved / rejected
+  final Timestamp? createdAt; // 🔥 Added
+  final Timestamp? statusUpdatedAt; // 🔥 Added (future use)
 
-  // 🔥 NEW FIELDS (PDF Requirement)
+  // 🔥 Store & Business Details
   final String storeName;
   final String storeDescription;
   final String storeLogo;
@@ -44,9 +48,11 @@ class Seller {
     required this.aadharFrontImage,
     required this.aadharBackImage,
     required this.gstCertificateImage,
-    this.approvalStatus = 'Pending',
 
-    // NEW
+    this.approvalStatus = 'pending',
+    this.createdAt,
+    this.statusUpdatedAt,
+
     this.storeName = '',
     this.storeDescription = '',
     this.storeLogo = '',
@@ -60,15 +66,19 @@ class Seller {
     this.totalOrders = 0,
     this.totalRevenue = 0.0,
     this.averageRating = 0.0,
-    this.verificationStatus = 'Unverified',
+    this.verificationStatus = 'unverified',
   });
 
-  bool get isApproved =>
-      approvalStatus.toLowerCase() == 'approved';
+  // ================= STATUS HELPERS =================
+
+  bool get isApproved => approvalStatus == 'approved';
+  bool get isPending => approvalStatus == 'pending';
+  bool get isRejected => approvalStatus == 'rejected';
+
+  // ================= TO MAP =================
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'sellerName': sellerName,
       'email': email,
       'businessName': businessName,
@@ -80,9 +90,13 @@ class Seller {
       'aadharFrontImage': aadharFrontImage,
       'aadharBackImage': aadharBackImage,
       'gstCertificateImage': gstCertificateImage,
-      'ApprovalStatus': approvalStatus,
+      'approvalStatus': approvalStatus,
 
-      // NEW
+      // 🔥 Important timestamps
+      'createdAt': createdAt ?? FieldValue.serverTimestamp(),
+      'statusUpdatedAt': statusUpdatedAt,
+
+      // Store details
       'storeName': storeName,
       'storeDescription': storeDescription,
       'storeLogo': storeLogo,
@@ -100,9 +114,11 @@ class Seller {
     };
   }
 
-  factory Seller.fromMap(Map<String, dynamic> map) {
+  // ================= FROM MAP =================
+
+  factory Seller.fromMap(Map<String, dynamic> map, String documentId) {
     return Seller(
-      id: map['id'] ?? '',
+      id: documentId,
       sellerName: map['sellerName'] ?? '',
       email: map['email'] ?? '',
       businessName: map['businessName'] ?? '',
@@ -114,9 +130,12 @@ class Seller {
       aadharFrontImage: map['aadharFrontImage'] ?? '',
       aadharBackImage: map['aadharBackImage'] ?? '',
       gstCertificateImage: map['gstCertificateImage'] ?? '',
-      approvalStatus: map['ApprovalStatus'] ?? 'Pending',
+      approvalStatus:
+      (map['approvalStatus'] ?? 'pending').toString().toLowerCase(),
 
-      // NEW
+      createdAt: map['createdAt'] as Timestamp?,
+      statusUpdatedAt: map['statusUpdatedAt'] as Timestamp?,
+
       storeName: map['storeName'] ?? '',
       storeDescription: map['storeDescription'] ?? '',
       storeLogo: map['storeLogo'] ?? '',
@@ -130,7 +149,46 @@ class Seller {
       totalOrders: map['totalOrders'] ?? 0,
       totalRevenue: (map['totalRevenue'] ?? 0).toDouble(),
       averageRating: (map['averageRating'] ?? 0).toDouble(),
-      verificationStatus: map['verificationStatus'] ?? 'Unverified',
+      verificationStatus: map['verificationStatus'] ?? 'unverified',
+    );
+  }
+
+  // ================= COPY WITH (Very Useful) =================
+
+  Seller copyWith({
+    String? approvalStatus,
+    Timestamp? statusUpdatedAt,
+  }) {
+    return Seller(
+      id: id,
+      sellerName: sellerName,
+      email: email,
+      businessName: businessName,
+      businessAddress: businessAddress,
+      phone: phone,
+      gstNumber: gstNumber,
+      aadharNumber: aadharNumber,
+      selfieImage: selfieImage,
+      aadharFrontImage: aadharFrontImage,
+      aadharBackImage: aadharBackImage,
+      gstCertificateImage: gstCertificateImage,
+      approvalStatus: approvalStatus ?? this.approvalStatus,
+      createdAt: createdAt,
+      statusUpdatedAt: statusUpdatedAt ?? this.statusUpdatedAt,
+      storeName: storeName,
+      storeDescription: storeDescription,
+      storeLogo: storeLogo,
+      rating: rating,
+      reviewCount: reviewCount,
+      bankAccountNumber: bankAccountNumber,
+      bankIFSC: bankIFSC,
+      bankHolderName: bankHolderName,
+      gstStatus: gstStatus,
+      totalProducts: totalProducts,
+      totalOrders: totalOrders,
+      totalRevenue: totalRevenue,
+      averageRating: averageRating,
+      verificationStatus: verificationStatus,
     );
   }
 }

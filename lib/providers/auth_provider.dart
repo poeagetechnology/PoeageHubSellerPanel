@@ -4,11 +4,14 @@ import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+
   Seller? _currentSeller;
   bool _isLoading = false;
 
   Seller? get currentSeller => _currentSeller;
   bool get isLoading => _isLoading;
+
+  // ================= SIGN UP =================
 
   Future<void> signUp({
     required String email,
@@ -19,16 +22,13 @@ class AuthProvider extends ChangeNotifier {
     required String phone,
     required String gstNumber,
     required String aadharNumber,
-    // images can be dart:io File (mobile/desktop) or XFile/Uint8List (web)
     required dynamic selfieImage,
     required dynamic aadharFrontImage,
     required dynamic aadharBackImage,
     required dynamic gstCertificateImage,
   }) async {
     try {
-      _isLoading = true;
-      notifyListeners();
-      debugPrint('AuthProvider.signUp: starting for $email');
+      _setLoading(true);
 
       await _authService.signUp(
         email: email,
@@ -45,59 +45,68 @@ class AuthProvider extends ChangeNotifier {
         gstCertificateImage: gstCertificateImage,
       );
 
-      _isLoading = false;
-      notifyListeners();
-      debugPrint('AuthProvider.signUp: completed for $email');
+      // After signup, seller should not be logged in fully
+      // because approval is pending
+      _currentSeller = null;
     } catch (e) {
-      _isLoading = false;
-      notifyListeners();
-      debugPrint('AuthProvider.signUp ERROR for $email: $e');
       rethrow;
+    } finally {
+      _setLoading(false);
     }
   }
 
-  Future<void> signIn({required String email, required String password}) async {
+  // ================= SIGN IN =================
+
+  Future<void> signIn({
+    required String email,
+    required String password,
+  }) async {
     try {
-      _isLoading = true;
-      notifyListeners();
-      debugPrint('AuthProvider.signIn: starting for $email');
+      _setLoading(true);
 
       final seller = await _authService.signIn(
         email: email,
         password: password,
       );
 
-      if (!seller.isApproved) {
-        _isLoading = false;
-        notifyListeners();
-        // use a standardized token so UI can detect and route to waiting page
-        throw Exception('PENDING_APPROVAL');
-      }
-
+      // AuthService already blocks pending/rejected.
+      // If we reach here → seller is approved.
       _currentSeller = seller;
-      _isLoading = false;
+
       notifyListeners();
-      debugPrint('AuthProvider.signIn: success for ${seller.id}');
     } catch (e) {
-      _isLoading = false;
-      notifyListeners();
-      debugPrint('AuthProvider.signIn ERROR for $email: $e');
       rethrow;
+    } finally {
+      _setLoading(false);
     }
   }
+
+  // ================= SIGN OUT =================
 
   Future<void> signOut() async {
+    await _authService.signOut();
+    _currentSeller = null;
+    notifyListeners();
+  }
+
+  // ================= LOAD CURRENT SELLER =================
+
+  Future<void> loadCurrentSeller() async {
     try {
-      await _authService.signOut();
-      _currentSeller = null;
-      notifyListeners();
-    } catch (e) {
-      rethrow;
+      _setLoading(true);
+
+      final seller = await _authService.getCurrentSeller();
+      _currentSeller = seller;
+
+    } finally {
+      _setLoading(false);
     }
   }
 
-  Future<void> loadCurrentSeller() async {
-    _currentSeller = await _authService.getCurrentSeller();
+  // ================= PRIVATE HELPER =================
+
+  void _setLoading(bool value) {
+    _isLoading = value;
     notifyListeners();
   }
 }
