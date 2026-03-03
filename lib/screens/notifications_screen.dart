@@ -122,7 +122,7 @@ class _NotificationsScreenState
 
               List<Widget> widgets = [];
 
-              /// ✅ Insert Date Header
+
               if (group != lastGroup) {
                 widgets.add(
                   Padding(
@@ -140,7 +140,7 @@ class _NotificationsScreenState
                 lastGroup = group;
               }
 
-              /// ✅ Notification Card
+
               widgets.add(
                 Dismissible(
                   key: Key(notification.notificationId),
@@ -162,7 +162,7 @@ class _NotificationsScreenState
                   child: GestureDetector(
                     onTap: () async {
 
-                      /// ✅ Mark as Read
+
                       if (!notification.isRead) {
                         await service.markAsRead(
                           sellerId,
@@ -170,7 +170,7 @@ class _NotificationsScreenState
                         );
                       }
 
-                      /// ✅ Navigate to Order
+
                       if (notification.type == 'order' &&
                           notification.orderId != null) {
                         Navigator.of(context).pushNamed(
@@ -195,7 +195,7 @@ class _NotificationsScreenState
                           CrossAxisAlignment.start,
                           children: [
 
-                            /// 🔴 Notification Icon + Unread Dot
+
                             Stack(
                               children: [
                                 const Icon(
@@ -223,7 +223,7 @@ class _NotificationsScreenState
 
                             const SizedBox(width: 12),
 
-                            /// 📄 Text Section
+
                             Expanded(
                               child: Column(
                                 crossAxisAlignment:

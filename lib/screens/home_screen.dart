@@ -98,7 +98,7 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(seller.businessName),
         actions: [
-          // 🔔 Notification Icon with Badge
+
           unreadCountAsync.when(
             data: (count) {
               return Stack(

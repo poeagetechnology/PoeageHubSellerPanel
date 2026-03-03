@@ -74,14 +74,14 @@ class AuthService {
     required dynamic aadharBackImage,
     required dynamic gstCertificateImage,
   }) async {
-    // 🔥 Create Firebase Auth User
+
     final userCredential = await _auth
         .createUserWithEmailAndPassword(
         email: email, password: password);
 
     final userId = userCredential.user!.uid;
 
-    // 🔥 Upload Images
+
     final selfieUrl = await uploadImage(
         selfieImage, userId, 'selfie', sellerName);
 
@@ -97,7 +97,7 @@ class AuthService {
         'gst_certificate',
         sellerName);
 
-    // 🔥 Create Seller Object
+
     Seller seller = Seller(
       id: userId,
       sellerName: sellerName,
@@ -112,16 +112,16 @@ class AuthService {
       aadharBackImage: aadharBackUrl,
       gstCertificateImage: gstCertificateUrl,
       approvalStatus: 'pending',
-      createdAt: Timestamp.now(), // 🔥 set initially
+      createdAt: Timestamp.now(),
     );
 
-    // 🔥 Save to Firestore (Server timestamp override)
+
     await _firestore
         .collection('sellers')
         .doc(userId)
         .set({
       ...seller.toMap(),
-      'createdAt': FieldValue.serverTimestamp(), // 🔥 real server time
+      'createdAt': FieldValue.serverTimestamp(),
     });
 
     return userCredential;

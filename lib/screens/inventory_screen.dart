@@ -29,7 +29,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
         brandName: p.brandName,
         description: p.description,
 
-        // 🔥 NEW PRICING STRUCTURE
+
         productionCost: p.productionCost,
         sellingPrice: p.sellingPrice,
         specialPrice: p.specialPrice,

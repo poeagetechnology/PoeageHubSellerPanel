@@ -14,12 +14,12 @@ class Seller {
   final String aadharBackImage;
   final String gstCertificateImage;
 
-  // ✅ Approval
-  final String approvalStatus; // pending / approved / rejected
-  final Timestamp? createdAt; // 🔥 Added
-  final Timestamp? statusUpdatedAt; // 🔥 Added (future use)
 
-  // 🔥 Store & Business Details
+  final String approvalStatus;
+  final Timestamp? createdAt;
+  final Timestamp? statusUpdatedAt;
+
+
   final String storeName;
   final String storeDescription;
   final String storeLogo;
@@ -92,7 +92,7 @@ class Seller {
       'gstCertificateImage': gstCertificateImage,
       'approvalStatus': approvalStatus,
 
-      // 🔥 Important timestamps
+
       'createdAt': createdAt ?? FieldValue.serverTimestamp(),
       'statusUpdatedAt': statusUpdatedAt,
 
@@ -153,7 +153,7 @@ class Seller {
     );
   }
 
-  // ================= COPY WITH (Very Useful) =================
+
 
   Seller copyWith({
     String? approvalStatus,

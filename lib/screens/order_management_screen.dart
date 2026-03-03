@@ -101,7 +101,7 @@ class _OrderManagementScreenState
               error: (e, _) => Center(child: Text(e.toString())),
               data: (orders) {
 
-                /// 🔥 AUTO OPEN FROM NOTIFICATION
+
                 if (_initialOrderId != null && !_hasOpenedInitialOrder) {
                   final matched = orders
                       .where((o) => o.docId == _initialOrderId)
