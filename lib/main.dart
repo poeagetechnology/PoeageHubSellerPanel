@@ -22,7 +22,6 @@ import 'screens/payments_payouts_screen.dart';
 import 'screens/reports_analytics_screen.dart';
 import 'screens/support_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/rejected_screen.dart';
 import 'screens/offer_banner_screen.dart';
 import 'screens/offer_scroller_screen.dart';
 
@@ -67,7 +66,7 @@ class MyApp extends StatelessWidget {
           '/login': (_) => const LoginScreen(),
           '/signup': (_) => const SignupScreen(),
           '/waiting': (_) => const WaitingApprovalScreen(),
-          '/rejected': (_) => const RejectedScreen(),
+
           '/home': (_) => const HomeScreen(),
           '/add-product': (_) => const AddProductScreen(),
 

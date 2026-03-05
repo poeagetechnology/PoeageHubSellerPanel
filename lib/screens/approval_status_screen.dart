@@ -18,7 +18,7 @@ class ApprovalStatusScreen extends StatelessWidget {
       return const LoginScreen();
     }
 
-    // ✅ If Approved → Go to Dashboard Automatically
+    // If Approved → Go to Dashboard Automatically
     if (seller.approvalStatus == 'approved') {
       return const HomeScreen();
     }
@@ -35,40 +35,83 @@ class ApprovalStatusScreen extends StatelessWidget {
               // ===================== PENDING =====================
               if (seller.approvalStatus == 'pending') ...[
                 const Icon(
-                  Icons.hourglass_empty,
+                  Icons.verified_user_outlined,
                   size: 90,
                   color: Colors.orange,
                 ),
                 const SizedBox(height: 20),
+
                 const Text(
-                  "Account Under Review",
+                  "🟠 Status: Under Review",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  "Your documents are being verified by our team.\nYou will be notified once approved.",
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
 
-                // Optional logout
-                TextButton(
-                  onPressed: () async {
-                    await authProvider.signOut();
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginScreen(),
+                const SizedBox(height: 25),
+
+                _infoTile(
+                  icon: Icons.description,
+                  title: "Documents Submitted",
+                  subtitle: "Your verification documents are received.",
+                  iconColor: Colors.green,
+                ),
+
+                const SizedBox(height: 15),
+
+                _infoTile(
+                  icon: Icons.access_time,
+                  title: "Estimated Review Time",
+                  subtitle: "24 – 48 Hours",
+                  iconColor: Colors.orange,
+                ),
+
+                const SizedBox(height: 15),
+
+                _infoTile(
+                  icon: Icons.email_outlined,
+                  title: "Email Notification",
+                  subtitle:
+                  "You will receive an email once your account is approved.",
+                  iconColor: Colors.blue,
+                ),
+
+                const SizedBox(height: 35),
+
+                const Text(
+                  "Thank you for your patience.\nWe are reviewing your account carefully.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+
+                const SizedBox(height: 25),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      await authProvider.signOut();
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LoginScreen(),
+                        ),
+                            (route) => false,
+                      );
+                    },
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: const Text(
+                      "Logout",
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.shade400),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                          (route) => false,
-                    );
-                  },
-                  child: const Text(
-                    "Logout",
-                    style: TextStyle(color: Colors.grey),
+                    ),
                   ),
                 ),
               ],
@@ -80,18 +123,20 @@ class ApprovalStatusScreen extends StatelessWidget {
                   size: 90,
                   color: Colors.red,
                 ),
+
                 const SizedBox(height: 20),
+
                 const Text(
-                  "Account Rejected",
+                  "🔴 Account Rejected",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.red,
                   ),
                 ),
-                const SizedBox(height: 15),
 
-                // Rejection Reason Box
+                const SizedBox(height: 20),
+
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -109,7 +154,6 @@ class ApprovalStatusScreen extends StatelessWidget {
 
                 const SizedBox(height: 25),
 
-                // ✅ NEW: Edit & Resubmit Button
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -137,27 +181,84 @@ class ApprovalStatusScreen extends StatelessWidget {
 
                 const SizedBox(height: 15),
 
-                // Logout Option
-                TextButton(
-                  onPressed: () async {
-                    await authProvider.signOut();
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginScreen(),
+                SizedBox(
+                  width: 150,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await authProvider.signOut();
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LoginScreen(),
+                        ),
+                            (route) => false,
+                      );
+                    },
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: const Text(
+                      "Logout",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
                       ),
-                          (route) => false,
-                    );
-                  },
-                  child: const Text(
-                    "Logout",
-                    style: TextStyle(color: Colors.grey),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.grey.shade200,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // ===================== Reusable Info Tile =====================
+  Widget _infoTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color iconColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: iconColor),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
