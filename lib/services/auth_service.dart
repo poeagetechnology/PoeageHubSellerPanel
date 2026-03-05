@@ -74,7 +74,6 @@ class AuthService {
     required dynamic aadharBackImage,
     required dynamic gstCertificateImage,
   }) async {
-
     final userCredential =
     await _auth.createUserWithEmailAndPassword(
       email: email,
@@ -83,17 +82,17 @@ class AuthService {
 
     final userId = userCredential.user!.uid;
 
-    final selfieUrl = await uploadImage(
-        selfieImage, userId, 'selfie', sellerName);
+    final selfieUrl =
+    await uploadImage(selfieImage, userId, 'selfie', sellerName);
 
-    final aadharFrontUrl = await uploadImage(
-        aadharFrontImage, userId, 'aadhar_front', sellerName);
+    final aadharFrontUrl =
+    await uploadImage(aadharFrontImage, userId, 'aadhar_front', sellerName);
 
-    final aadharBackUrl = await uploadImage(
-        aadharBackImage, userId, 'aadhar_back', sellerName);
+    final aadharBackUrl =
+    await uploadImage(aadharBackImage, userId, 'aadhar_back', sellerName);
 
-    final gstCertificateUrl = await uploadImage(
-        gstCertificateImage, userId, 'gst_certificate', sellerName);
+    final gstCertificateUrl =
+    await uploadImage(gstCertificateImage, userId, 'gst_certificate', sellerName);
 
     Seller seller = Seller(
       id: userId,
@@ -109,7 +108,7 @@ class AuthService {
       aadharBackImage: aadharBackUrl,
       gstCertificateImage: gstCertificateUrl,
       approvalStatus: 'pending',
-      rejectionReason: null, // important
+      rejectionReason: null,
       createdAt: Timestamp.now(),
     );
 
@@ -119,6 +118,74 @@ class AuthService {
     });
 
     return userCredential;
+  }
+
+  // ================= UPDATE & RESUBMIT =================
+
+  Future<void> updateSellerAndResubmit({
+    required String sellerId,
+    required String sellerName,
+    required String businessName,
+    required String businessAddress,
+    required String phone,
+    required String gstNumber,
+    required String aadharNumber,
+    dynamic selfieImage,
+    dynamic aadharFrontImage,
+    dynamic aadharBackImage,
+    dynamic gstCertificateImage,
+  }) async {
+
+    final doc =
+    await _firestore.collection('sellers').doc(sellerId).get();
+
+    if (!doc.exists) throw Exception("SELLER_NOT_FOUND");
+
+    final existingData = doc.data() as Map<String, dynamic>;
+
+    String selfieUrl = existingData['selfieImage'];
+    String aadharFrontUrl = existingData['aadharFrontImage'];
+    String aadharBackUrl = existingData['aadharBackImage'];
+    String gstCertificateUrl = existingData['gstCertificateImage'];
+
+    // Upload only if new image selected
+    if (selfieImage != null) {
+      selfieUrl =
+      await uploadImage(selfieImage, sellerId, 'selfie', sellerName);
+    }
+
+    if (aadharFrontImage != null) {
+      aadharFrontUrl =
+      await uploadImage(aadharFrontImage, sellerId, 'aadhar_front', sellerName);
+    }
+
+    if (aadharBackImage != null) {
+      aadharBackUrl =
+      await uploadImage(aadharBackImage, sellerId, 'aadhar_back', sellerName);
+    }
+
+    if (gstCertificateImage != null) {
+      gstCertificateUrl =
+      await uploadImage(gstCertificateImage, sellerId, 'gst_certificate', sellerName);
+    }
+
+    await _firestore.collection('sellers').doc(sellerId).update({
+      'sellerName': sellerName,
+      'businessName': businessName,
+      'businessAddress': businessAddress,
+      'phone': phone,
+      'gstNumber': gstNumber,
+      'aadharNumber': aadharNumber,
+      'selfieImage': selfieUrl,
+      'aadharFrontImage': aadharFrontUrl,
+      'aadharBackImage': aadharBackUrl,
+      'gstCertificateImage': gstCertificateUrl,
+
+      // Reset approval
+      'approvalStatus': 'pending',
+      'rejectionReason': null,
+      'statusUpdatedAt': Timestamp.now(),
+    });
   }
 
   // ================= SIGN IN =================
@@ -143,15 +210,10 @@ class AuthService {
       throw Exception('SELLER_NOT_FOUND');
     }
 
-    final seller = Seller.fromMap(
+    return Seller.fromMap(
       doc.data() as Map<String, dynamic>,
       doc.id,
     );
-
-    // ✅ No approval blocking here
-    // UI will handle approved/pending/rejected
-
-    return seller;
   }
 
   // ================= SIGN OUT =================

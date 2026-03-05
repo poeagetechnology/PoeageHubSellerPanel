@@ -2,11 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Seller {
   final String id;
+
+  // Basic info
   final String sellerName;
   final String email;
   final String businessName;
   final String businessAddress;
   final String phone;
+
+  // Verification info
   final String gstNumber;
   final String aadharNumber;
   final String selfieImage;
@@ -14,27 +18,33 @@ class Seller {
   final String aadharBackImage;
   final String gstCertificateImage;
 
-
+  // Status
   final String approvalStatus;
   final Timestamp? createdAt;
   final Timestamp? statusUpdatedAt;
+  final String? rejectionReason;
 
-
+  // Store info
   final String storeName;
   final String storeDescription;
   final String storeLogo;
+
+  // Ratings & stats
   final double rating;
   final int reviewCount;
-  final String bankAccountNumber;
-  final String bankIFSC;
-  final String bankHolderName;
-  final String gstStatus;
   final int totalProducts;
   final int totalOrders;
   final double totalRevenue;
   final double averageRating;
+
+  // Bank & GST
+  final String bankAccountNumber;
+  final String bankIFSC;
+  final String bankHolderName;
+  final String gstStatus;
+
+  // Verification
   final String verificationStatus;
-  final String? rejectionReason;
 
   Seller({
     required this.id,
@@ -53,22 +63,24 @@ class Seller {
     this.approvalStatus = 'pending',
     this.createdAt,
     this.statusUpdatedAt,
+    this.rejectionReason,
 
     this.storeName = '',
     this.storeDescription = '',
     this.storeLogo = '',
+
     this.rating = 0.0,
     this.reviewCount = 0,
-    this.bankAccountNumber = '',
-    this.bankIFSC = '',
-    this.bankHolderName = '',
-    this.gstStatus = '',
     this.totalProducts = 0,
     this.totalOrders = 0,
     this.totalRevenue = 0.0,
     this.averageRating = 0.0,
+
+    this.bankAccountNumber = '',
+    this.bankIFSC = '',
+    this.bankHolderName = '',
+    this.gstStatus = '',
     this.verificationStatus = 'unverified',
-    this.rejectionReason,
   });
 
   // ================= STATUS HELPERS =================
@@ -92,28 +104,28 @@ class Seller {
       'aadharFrontImage': aadharFrontImage,
       'aadharBackImage': aadharBackImage,
       'gstCertificateImage': gstCertificateImage,
+
       'approvalStatus': approvalStatus,
-
-
       'createdAt': createdAt ?? FieldValue.serverTimestamp(),
       'statusUpdatedAt': statusUpdatedAt,
+      'rejectionReason': rejectionReason,
 
-      // Store details
       'storeName': storeName,
       'storeDescription': storeDescription,
       'storeLogo': storeLogo,
+
       'rating': rating,
       'reviewCount': reviewCount,
-      'bankAccountNumber': bankAccountNumber,
-      'bankIFSC': bankIFSC,
-      'bankHolderName': bankHolderName,
-      'gstStatus': gstStatus,
       'totalProducts': totalProducts,
       'totalOrders': totalOrders,
       'totalRevenue': totalRevenue,
       'averageRating': averageRating,
+
+      'bankAccountNumber': bankAccountNumber,
+      'bankIFSC': bankIFSC,
+      'bankHolderName': bankHolderName,
+      'gstStatus': gstStatus,
       'verificationStatus': verificationStatus,
-      'rejectionReason': rejectionReason,
     };
   }
 
@@ -133,31 +145,34 @@ class Seller {
       aadharFrontImage: map['aadharFrontImage'] ?? '',
       aadharBackImage: map['aadharBackImage'] ?? '',
       gstCertificateImage: map['gstCertificateImage'] ?? '',
+
       approvalStatus:
       (map['approvalStatus'] ?? 'pending').toString().toLowerCase(),
 
       createdAt: map['createdAt'] as Timestamp?,
       statusUpdatedAt: map['statusUpdatedAt'] as Timestamp?,
+      rejectionReason: map['rejectionReason'],
 
       storeName: map['storeName'] ?? '',
       storeDescription: map['storeDescription'] ?? '',
       storeLogo: map['storeLogo'] ?? '',
-      rating: (map['rating'] ?? 0).toDouble(),
-      reviewCount: map['reviewCount'] ?? 0,
+
+      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      reviewCount: (map['reviewCount'] as num?)?.toInt() ?? 0,
+      totalProducts: (map['totalProducts'] as num?)?.toInt() ?? 0,
+      totalOrders: (map['totalOrders'] as num?)?.toInt() ?? 0,
+      totalRevenue: (map['totalRevenue'] as num?)?.toDouble() ?? 0.0,
+      averageRating: (map['averageRating'] as num?)?.toDouble() ?? 0.0,
+
       bankAccountNumber: map['bankAccountNumber'] ?? '',
       bankIFSC: map['bankIFSC'] ?? '',
       bankHolderName: map['bankHolderName'] ?? '',
       gstStatus: map['gstStatus'] ?? '',
-      totalProducts: map['totalProducts'] ?? 0,
-      totalOrders: map['totalOrders'] ?? 0,
-      totalRevenue: (map['totalRevenue'] ?? 0).toDouble(),
-      averageRating: (map['averageRating'] ?? 0).toDouble(),
       verificationStatus: map['verificationStatus'] ?? 'unverified',
-      rejectionReason: map['rejectionReason'],
     );
   }
 
-
+  // ================= COPY WITH =================
 
   Seller copyWith({
     String? approvalStatus,
@@ -177,23 +192,27 @@ class Seller {
       aadharFrontImage: aadharFrontImage,
       aadharBackImage: aadharBackImage,
       gstCertificateImage: gstCertificateImage,
+
       approvalStatus: approvalStatus ?? this.approvalStatus,
+      statusUpdatedAt: statusUpdatedAt ?? this.statusUpdatedAt,
       rejectionReason: rejectionReason ?? this.rejectionReason,
       createdAt: createdAt,
-      statusUpdatedAt: statusUpdatedAt ?? this.statusUpdatedAt,
+
       storeName: storeName,
       storeDescription: storeDescription,
       storeLogo: storeLogo,
+
       rating: rating,
       reviewCount: reviewCount,
-      bankAccountNumber: bankAccountNumber,
-      bankIFSC: bankIFSC,
-      bankHolderName: bankHolderName,
-      gstStatus: gstStatus,
       totalProducts: totalProducts,
       totalOrders: totalOrders,
       totalRevenue: totalRevenue,
       averageRating: averageRating,
+
+      bankAccountNumber: bankAccountNumber,
+      bankIFSC: bankIFSC,
+      bankHolderName: bankHolderName,
+      gstStatus: gstStatus,
       verificationStatus: verificationStatus,
     );
   }

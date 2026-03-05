@@ -4,11 +4,15 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../providers/auth_provider.dart';
+import 'approval_status_screen.dart';
+import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   static const routeName = '/signup';
 
-  const SignupScreen({super.key});
+  final bool isEditMode;
+
+  const SignupScreen({super.key, this.isEditMode = false});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -32,6 +36,29 @@ class _SignupScreenState extends State<SignupScreen> {
   dynamic _gstCertificateImage;
 
   bool _isSubmitting = false;
+  bool _isInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (widget.isEditMode && !_isInitialized) {
+      final seller =
+          Provider.of<AuthProvider>(context, listen: false).currentSeller;
+
+      if (seller != null) {
+        _sellerNameController.text = seller.sellerName;
+        _emailController.text = seller.email;
+        _businessNameController.text = seller.businessName;
+        _businessAddressController.text = seller.businessAddress;
+        _phoneController.text = seller.phone;
+        _gstNumberController.text = seller.gstNumber;
+        _aadharNumberController.text = seller.aadharNumber;
+      }
+
+      _isInitialized = true;
+    }
+  }
 
   @override
   void dispose() {
@@ -71,57 +98,18 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  Widget _buildImageUploadButton(
-      String label, dynamic image, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding:
-        const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-        decoration: BoxDecoration(
-          border: Border.all(
-              color: image == null
-                  ? Colors.grey.shade400
-                  : Colors.green),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              image == null
-                  ? Icons.upload_file
-                  : Icons.check_circle,
-              color:
-              image == null ? Colors.grey : Colors.green,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                image == null ? label : "$label ✓",
-                style: TextStyle(
-                  color: image == null
-                      ? Colors.grey[700]
-                      : Colors.green,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selfieImage == null ||
-        _aadharFrontImage == null ||
-        _aadharBackImage == null ||
-        _gstCertificateImage == null) {
+    if (!widget.isEditMode &&
+        (_selfieImage == null ||
+            _aadharFrontImage == null ||
+            _aadharBackImage == null ||
+            _gstCertificateImage == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content:
-            Text('Please upload all required documents')),
+          content: Text('Please upload all required documents'),
+        ),
       );
       return;
     }
@@ -129,53 +117,61 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      await context.read<AuthProvider>().signUp(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-        sellerName: _sellerNameController.text.trim(),
-        businessName:
-        _businessNameController.text.trim(),
-        businessAddress:
-        _businessAddressController.text.trim(),
-        phone: _phoneController.text.trim(),
-        gstNumber: _gstNumberController.text.trim(),
-        aadharNumber:
-        _aadharNumberController.text.trim(),
-        selfieImage: _selfieImage!,
-        aadharFrontImage: _aadharFrontImage!,
-        aadharBackImage: _aadharBackImage!,
-        gstCertificateImage:
-        _gstCertificateImage!,
-      );
+      final authProvider = context.read<AuthProvider>();
+
+      if (widget.isEditMode) {
+        await authProvider.updateSellerAndResubmit(
+          sellerName: _sellerNameController.text.trim(),
+          businessName: _businessNameController.text.trim(),
+          businessAddress: _businessAddressController.text.trim(),
+          phone: _phoneController.text.trim(),
+          gstNumber: _gstNumberController.text.trim(),
+          aadharNumber: _aadharNumberController.text.trim(),
+          selfieImage: _selfieImage,
+          aadharFrontImage: _aadharFrontImage,
+          aadharBackImage: _aadharBackImage,
+          gstCertificateImage: _gstCertificateImage,
+        );
+      } else {
+        await authProvider.signUp(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+          sellerName: _sellerNameController.text.trim(),
+          businessName: _businessNameController.text.trim(),
+          businessAddress: _businessAddressController.text.trim(),
+          phone: _phoneController.text.trim(),
+          gstNumber: _gstNumberController.text.trim(),
+          aadharNumber: _aadharNumberController.text.trim(),
+          selfieImage: _selfieImage!,
+          aadharFrontImage: _aadharFrontImage!,
+          aadharBackImage: _aadharBackImage!,
+          gstCertificateImage: _gstCertificateImage!,
+        );
+      }
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-          Text("Account submitted for approval ✅"),
+        SnackBar(
+          content: Text(widget.isEditMode
+              ? "Profile updated & sent for re-approval ✅"
+              : "Account submitted for approval ✅"),
           backgroundColor: Colors.green,
         ),
       );
 
-      await Future.delayed(
-          const Duration(seconds: 2));
-
-      if (!mounted) return;
-      Navigator.of(context)
-          .pushReplacementNamed('/waiting');
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => const ApprovalStatusScreen(),
+        ),
+            (route) => false,
+      );
     } catch (error) {
       if (!mounted) return;
 
-      String message = error.toString();
-
-      if (message.contains('email-already-in-use')) {
-        message = "Email already in use.";
-      }
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(error.toString().replaceAll('Exception: ', '')),
           backgroundColor: Colors.red,
         ),
       );
@@ -188,10 +184,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final providerLoading =
-        context.watch<AuthProvider>().isLoading;
-
-    final isLoading = providerLoading || _isSubmitting;
+    final isLoading =
+        context.watch<AuthProvider>().isLoading || _isSubmitting;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
@@ -201,89 +195,61 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 10),
-                const Text(
-                  'Create Seller Account',
-                  style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
+                const SizedBox(height: 20),
+
+                Text(
+                  widget.isEditMode
+                      ? "Update Your Details"
+                      : "Create Seller Account",
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
+
                 const SizedBox(height: 30),
 
-                _buildTextField(
-                    _sellerNameController, 'Full Name'),
-                _buildTextField(
-                    _emailController, 'Email',
-                    keyboard:
-                    TextInputType.emailAddress),
-                _buildTextField(
-                    _passwordController, 'Password',
-                    obscure: true),
-                _buildTextField(
-                    _businessNameController,
-                    'Business Name'),
-                _buildTextField(
-                    _businessAddressController,
+                _buildTextField(_sellerNameController, 'Full Name'),
+                _buildTextField(_emailController, 'Email',
+                    enabled: !widget.isEditMode,
+                    keyboard: TextInputType.emailAddress),
+
+                if (!widget.isEditMode)
+                  _buildTextField(_passwordController, 'Password',
+                      obscure: true),
+
+                _buildTextField(_businessNameController, 'Business Name'),
+                _buildTextField(_businessAddressController,
                     'Business Address',
                     maxLines: 3),
-                _buildTextField(
-                    _phoneController, 'Phone Number',
+                _buildTextField(_phoneController, 'Phone Number',
                     keyboard: TextInputType.phone),
-                _buildTextField(
-                    _gstNumberController, 'GST Number'),
-                _buildTextField(
-                    _aadharNumberController,
-                    'Aadhar Number'),
+                _buildTextField(_gstNumberController, 'GST Number'),
+                _buildTextField(_aadharNumberController, 'Aadhar Number'),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 30),
+
                 const Text(
-                  'Required Documents',
+                  "Required Documents",
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
 
-                _buildImageUploadButton(
-                    'Upload Selfie',
-                    _selfieImage,
-                        () => _pickImage('selfie')),
-                const SizedBox(height: 12),
-
-                _buildImageUploadButton(
-                    'Upload Aadhar Front',
-                    _aadharFrontImage,
-                        () => _pickImage(
-                        'aadharFront')),
-                const SizedBox(height: 12),
-
-                _buildImageUploadButton(
-                    'Upload Aadhar Back',
-                    _aadharBackImage,
-                        () => _pickImage(
-                        'aadharBack')),
-                const SizedBox(height: 12),
-
-                _buildImageUploadButton(
-                    'Upload GST Certificate',
-                    _gstCertificateImage,
-                        () => _pickImage('gst')),
+                _buildUploadTile("Upload Selfie", "selfie"),
+                _buildUploadTile("Upload Aadhar Front", "aadharFront"),
+                _buildUploadTile("Upload Aadhar Back", "aadharBack"),
+                _buildUploadTile("Upload GST Certificate", "gst"),
 
                 const SizedBox(height: 30),
 
                 ElevatedButton(
-                  onPressed:
-                  isLoading ? null : _submit,
+                  onPressed: isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    const Color(0xFF1F2937),
+                    backgroundColor: const Color(0xFF1F2937),
                     padding:
-                    const EdgeInsets.symmetric(
-                        vertical: 16),
+                    const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius:
                         BorderRadius.circular(8)),
@@ -291,24 +257,62 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: isLoading
                       ? const CircularProgressIndicator(
                       color: Colors.white)
-                      : const Text(
-                    'Submit for Approval',
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white),
+                      : Text(
+                    widget.isEditMode
+                        ? 'Update & Re-Submit'
+                        : 'Submit for Approval',
+                    style: const TextStyle(
+                        fontSize: 16, color: Colors.white),
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                TextButton(
-                  onPressed: () =>
-                      Navigator.of(context).pop(),
-                  child: const Text(
-                      'Already have an account? Login'),
-                ),
+                if (!widget.isEditMode)
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (_) => const LoginScreen()),
+                      );
+                    },
+                    child: const Text(
+                      "Already have an account? Login",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUploadTile(String title, String type) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: () => _pickImage(type),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: 16, vertical: 18),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade400),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.upload_file),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 16),
+            ],
           ),
         ),
       ),
@@ -321,6 +325,7 @@ class _SignupScreenState extends State<SignupScreen> {
         bool obscure = false,
         int maxLines = 1,
         TextInputType keyboard = TextInputType.text,
+        bool enabled = true,
       }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -328,23 +333,20 @@ class _SignupScreenState extends State<SignupScreen> {
         controller: controller,
         obscureText: obscure,
         maxLines: maxLines,
+        enabled: enabled,
         keyboardType: keyboard,
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(
-              borderRadius:
-              BorderRadius.circular(8)),
+              borderRadius: BorderRadius.circular(8)),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter $label';
           }
-
-          if (label == 'Password' &&
-              value.length < 6) {
+          if (label == 'Password' && value.length < 6) {
             return 'Password must be at least 6 characters';
           }
-
           return null;
         },
       ),
