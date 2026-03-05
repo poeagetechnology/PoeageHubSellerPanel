@@ -45,8 +45,6 @@ class AuthProvider extends ChangeNotifier {
         gstCertificateImage: gstCertificateImage,
       );
 
-      // After signup, seller should not be logged in fully
-      // because approval is pending
       _currentSeller = null;
     } catch (e) {
       rethrow;
@@ -69,8 +67,7 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
 
-      // AuthService already blocks pending/rejected.
-      // If we reach here → seller is approved.
+
       _currentSeller = seller;
 
       notifyListeners();

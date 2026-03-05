@@ -34,6 +34,7 @@ class Seller {
   final double totalRevenue;
   final double averageRating;
   final String verificationStatus;
+  final String? rejectionReason;
 
   Seller({
     required this.id,
@@ -67,6 +68,7 @@ class Seller {
     this.totalRevenue = 0.0,
     this.averageRating = 0.0,
     this.verificationStatus = 'unverified',
+    this.rejectionReason,
   });
 
   // ================= STATUS HELPERS =================
@@ -111,6 +113,7 @@ class Seller {
       'totalRevenue': totalRevenue,
       'averageRating': averageRating,
       'verificationStatus': verificationStatus,
+      'rejectionReason': rejectionReason,
     };
   }
 
@@ -150,6 +153,7 @@ class Seller {
       totalRevenue: (map['totalRevenue'] ?? 0).toDouble(),
       averageRating: (map['averageRating'] ?? 0).toDouble(),
       verificationStatus: map['verificationStatus'] ?? 'unverified',
+      rejectionReason: map['rejectionReason'],
     );
   }
 
@@ -158,6 +162,7 @@ class Seller {
   Seller copyWith({
     String? approvalStatus,
     Timestamp? statusUpdatedAt,
+    String? rejectionReason,
   }) {
     return Seller(
       id: id,
@@ -173,6 +178,7 @@ class Seller {
       aadharBackImage: aadharBackImage,
       gstCertificateImage: gstCertificateImage,
       approvalStatus: approvalStatus ?? this.approvalStatus,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
       createdAt: createdAt,
       statusUpdatedAt: statusUpdatedAt ?? this.statusUpdatedAt,
       storeName: storeName,

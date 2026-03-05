@@ -75,12 +75,13 @@ class AuthService {
     required dynamic gstCertificateImage,
   }) async {
 
-    final userCredential = await _auth
-        .createUserWithEmailAndPassword(
-        email: email, password: password);
+    final userCredential =
+    await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
     final userId = userCredential.user!.uid;
-
 
     final selfieUrl = await uploadImage(
         selfieImage, userId, 'selfie', sellerName);
@@ -92,11 +93,7 @@ class AuthService {
         aadharBackImage, userId, 'aadhar_back', sellerName);
 
     final gstCertificateUrl = await uploadImage(
-        gstCertificateImage,
-        userId,
-        'gst_certificate',
-        sellerName);
-
+        gstCertificateImage, userId, 'gst_certificate', sellerName);
 
     Seller seller = Seller(
       id: userId,
@@ -112,14 +109,11 @@ class AuthService {
       aadharBackImage: aadharBackUrl,
       gstCertificateImage: gstCertificateUrl,
       approvalStatus: 'pending',
+      rejectionReason: null, // important
       createdAt: Timestamp.now(),
     );
 
-
-    await _firestore
-        .collection('sellers')
-        .doc(userId)
-        .set({
+    await _firestore.collection('sellers').doc(userId).set({
       ...seller.toMap(),
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -133,9 +127,11 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final userCredential = await _auth
-        .signInWithEmailAndPassword(
-        email: email, password: password);
+    final userCredential =
+    await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
     final uid = userCredential.user!.uid;
 
@@ -148,24 +144,14 @@ class AuthService {
     }
 
     final seller = Seller.fromMap(
-        doc.data() as Map<String, dynamic>, doc.id);
+      doc.data() as Map<String, dynamic>,
+      doc.id,
+    );
 
-    switch (seller.approvalStatus) {
-      case 'approved':
-        return seller;
+    // ✅ No approval blocking here
+    // UI will handle approved/pending/rejected
 
-      case 'pending':
-        await _auth.signOut();
-        throw Exception('PENDING_APPROVAL');
-
-      case 'rejected':
-        await _auth.signOut();
-        throw Exception('ACCOUNT_REJECTED');
-
-      default:
-        await _auth.signOut();
-        throw Exception('UNKNOWN_STATUS');
-    }
+    return seller;
   }
 
   // ================= SIGN OUT =================
@@ -187,6 +173,8 @@ class AuthService {
     if (!doc.exists) return null;
 
     return Seller.fromMap(
-        doc.data() as Map<String, dynamic>, doc.id);
+      doc.data() as Map<String, dynamic>,
+      doc.id,
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'approval_status_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
@@ -31,45 +32,32 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
-      }
+
+      if (!mounted) return;
+
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const ApprovalStatusScreen(),
+        ),
+      );
     } catch (error) {
       if (!mounted) return;
-      final message = error.toString();
-      if (message.contains('PENDING_APPROVAL')) {
-        // redirect to waiting page instead of showing a snack
-        Navigator.of(context).pushReplacementNamed('/waiting');
-        return;
-      }
 
-      if (message.contains('REJECTED|')) {
-        // Expected format: REJECTED|<reason>|<iso timestamp>
-        String reason = '';
-        String rejectedAt = '';
-        try {
-          final parts = message.split('|');
-          if (parts.length >= 2) reason = parts[1];
-          if (parts.length >= 3) rejectedAt = parts[2];
-        } catch (_) {}
-        Navigator.of(context).pushReplacementNamed(
-          '/rejected',
-          arguments: {
-            'reason': reason,
-            'rejectedAt': rejectedAt,
-          },
-        );
-        return;
-      }
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.toString().replaceAll('Exception: ', ''),
+          ),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -83,10 +71,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const Text(
                     'Welcome Back!',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
+
+                  // EMAIL
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
@@ -104,7 +97,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 16),
+
+                  // PASSWORD
                   TextFormField(
                     controller: _passwordController,
                     decoration: const InputDecoration(
@@ -122,22 +118,37 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 24),
+
+                  // LOGIN BUTTON
                   ElevatedButton(
-                    onPressed: context.watch<AuthProvider>().isLoading
-                        ? null
-                        : _submit,
+                    onPressed:
+                    authProvider.isLoading ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding:
+                      const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: context.watch<AuthProvider>().isLoading
-                        ? const CircularProgressIndicator()
+                    child: authProvider.isLoading
+                        ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                         : const Text('Login'),
                   ),
+
                   const SizedBox(height: 16),
+
+                  // SIGNUP BUTTON
                   TextButton(
-                    onPressed: () => Navigator.of(context).pushNamed('/signup'),
-                    child: const Text('Don\'t have an account? Sign Up'),
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed('/signup'),
+                    child:
+                    const Text("Don't have an account? Sign Up"),
                   ),
                 ],
               ),
