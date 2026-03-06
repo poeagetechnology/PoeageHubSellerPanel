@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      // 🔥 Always go to ApprovalStatusScreen
+
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (_) => const ApprovalStatusScreen(),

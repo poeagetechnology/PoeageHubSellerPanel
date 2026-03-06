@@ -11,7 +11,6 @@ import 'providers/auth_provider.dart';
 // Screens
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
-import 'screens/waiting_approval_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/add_product_screen.dart';
 import 'screens/vendor_profile_screen.dart';
@@ -65,7 +64,6 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login': (_) => const LoginScreen(),
           '/signup': (_) => const SignupScreen(),
-          '/waiting': (_) => const WaitingApprovalScreen(),
 
           '/home': (_) => const HomeScreen(),
           '/add-product': (_) => const AddProductScreen(),
@@ -103,7 +101,7 @@ class MyApp extends StatelessWidget {
           OfferScrollerScreen.routeName: (_) =>
           const OfferScrollerScreen(),
 
-          /// ✅ FIXED HERE
+
           NotificationsScreen.routeName: (_) =>
           const NotificationsScreen(),
         },
